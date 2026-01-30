@@ -30,6 +30,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+        //     // to collapse menus
+        //     ->sidebarCollapsible()   // 👈 enables collapse
+        // ->sidebarWidth('16rem')
+        // ->collapsedSidebarWidth('4rem')
+        // ->maxContentWidth('full')
+
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -12,19 +12,17 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
-
-
-//use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-//use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
+
+use Filament\Tables\Filters\SelectFilter;
 
 class ApplicationResource extends Resource
 {
@@ -94,6 +92,12 @@ class ApplicationResource extends Resource
                         ->openable()
                         ->preserveFilenames(),
                 ]),
+
+            Select::make('status')
+    ->options(Application::statuses())
+    ->default(Application::STATUS_APPLIED)
+    ->required()
+    ->visible(fn () => auth()->user()?->role === 'admin'),
             ]);
     }
 
@@ -102,20 +106,46 @@ class ApplicationResource extends Resource
         return $table
             ->columns([
                 //
-                 TextColumn::make('name')->searchable(),
-        TextColumn::make('email'),
-        TextColumn::make('phone'),
-        TextColumn::make('college'),
-        TextColumn::make('degree'),
-        TextColumn::make('domain'),
-        TextColumn::make('skills'),
+                 TextColumn::make('name')
+                    ->searchable(),
+        TextColumn::make('email') 
+            ->searchable(),
+        TextColumn::make('phone') ->toggleable(),
+        TextColumn::make('college') ->toggleable(),
+        TextColumn::make('degree') ->toggleable(),
+        TextColumn::make('domain') ->toggleable(),
+        TextColumn::make('skills')  ->toggleable(isToggledHiddenByDefault: true),
         TextColumn::make('created_at')->dateTime(),
+            
+
+            BadgeColumn::make('status')
+    ->colors([
+        'secondary' => 'applied',
+        'warning'   => 'interview',
+        'success'   => 'selected',
+    ])
+    ->formatStateUsing(fn (string $state) => ucfirst($state)),
             ])
             ->filters([
-                //
+                //to filter from status
+
+                SelectFilter::make('status')
+    ->options(Application::statuses()),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+        /// for change status from intern
+                Action::make('Mark Interview')
+    ->visible(fn ($record) => $record->status === 'applied')
+    ->action(fn ($record) => $record->update(['status' => 'interview']))
+    ->color('warning'),
+
+    Action::make('Select Intern')
+    ->visible(fn ($record) => $record->status === 'interview')
+    ->action(fn ($record) => $record->update(['status' => 'selected']))
+    ->color('success'),
+
+// for edit 
+    Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
