@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ApplicationsResource\Pages;
-use App\Filament\Resources\ApplicationsResource\RelationManagers;
+use App\Filament\Resources\ApplicationResource\Pages;
+use App\Filament\Resources\ApplicationResource\RelationManagers;
 use App\Models\Application;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -26,9 +26,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 
-class ApplicationsResource extends Resource
+class ApplicationResource extends Resource
 {
-    protected static ?string $model = Applications::class;
+    protected static ?string $model = Application::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -135,8 +135,8 @@ class ApplicationsResource extends Resource
     {
         return [
             'index' => Pages\ListApplications::route('/'),
-            'create' => Pages\CreateApplications::route('/create'),
-            'edit' => Pages\EditApplications::route('/{record}/edit'),
+            'create' => Pages\CreateApplication::route('/create'),
+            'edit' => Pages\EditApplication::route('/{record}/edit'),
         ];
     }
 }
