@@ -21,6 +21,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Dropdown;
+
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+//use Filament\Infolists\Components\Section;
+use Filament\Tables\Actions\ViewAction;
 
 use Filament\Tables\Filters\SelectFilter;
 
@@ -28,7 +34,11 @@ class ApplicationResource extends Resource
 {
     protected static ?string $model = Application::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+     
+    
+
+   
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {
@@ -62,10 +72,26 @@ class ApplicationResource extends Resource
                             ->required()
                             ->maxLength(100),
 
-                        TextInput::make('domain')
+                        // TextInput::make('domain')
+                        //     ->label('Internship Domain')
+                        //     ->required()
+                        //     ->maxLength(100),
+                        
+                        Select::make('domain')
                             ->label('Internship Domain')
+                            ->options([
+                                'frontend' => 'Frontend Developer',
+                                'backend' => 'Backend Developer',
+                                'fullstack' => 'Full Stack Developer',
+                                'mobile' => 'Mobile App Developer',
+                                'uiux' => 'UI / UX Designer',
+                                'data' => 'Data Analyst',
+                                'devops' => 'DevOps Engineer',
+                                'ml' => 'Machine Learning',
+                            ])
                             ->required()
-                            ->maxLength(100),
+                            ->searchable()
+                            ->disabled(fn ($record) => $record?->status !== 'applied'),
                     ]),
                 ]),
 
@@ -93,65 +119,105 @@ class ApplicationResource extends Resource
                         ->preserveFilenames(),
                 ]),
 
-            Select::make('status')
-    ->options(Application::statuses())
-    ->default(Application::STATUS_APPLIED)
-    ->required()
-    ->visible(fn () => auth()->user()?->role === 'admin'),
+                Select::make('status')
+                    ->options(Application::statuses())
+                    ->default(Application::STATUS_APPLIED)
+                    ->required()
+                    ->visible(fn () => auth()->user()?->role === 'admin'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s') // ⬅ auto refresh
+            ->defaultSort('created_at', 'desc') // 🔥 newest on top
             ->columns([
-                //
-                 TextColumn::make('name')
-                    ->searchable(),
-        TextColumn::make('email') 
-            ->searchable(),
-        TextColumn::make('phone') ->toggleable(),
-        TextColumn::make('college') ->toggleable(),
-        TextColumn::make('degree') ->toggleable(),
-        TextColumn::make('domain') ->toggleable(),
-        TextColumn::make('skills')  ->toggleable(isToggledHiddenByDefault: true),
-        TextColumn::make('created_at')->dateTime(),
-            
+                // To display in table
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('email')->searchable(),
+                TextColumn::make('phone') ->toggleable(),
+                TextColumn::make('college') ->toggleable(),
+                TextColumn::make('degree') ->toggleable(),
+                TextColumn::make('domain') ->toggleable(),
+                TextColumn::make('skills')  ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')->dateTime(),
+                
+                BadgeColumn::make('status')
+                ->colors([
+                    'secondary' => 'applied',
+                    'warning'   => 'interviewed',
+                    'success'   => 'selected',
+                ])->alignCenter()
+   
 
-            BadgeColumn::make('status')
-    ->colors([
-        'secondary' => 'applied',
-        'warning'   => 'interview',
-        'success'   => 'selected',
-    ])
-    ->formatStateUsing(fn (string $state) => ucfirst($state)),
-            ])
+            ->formatStateUsing(fn (string $state) => ucfirst($state)),
+                    ])
+
+        // filter
             ->filters([
-                //to filter from status
+
+             //to filter from status
 
                 SelectFilter::make('status')
-    ->options(Application::statuses()),
-            ])
-            ->actions([
-        /// for change status from intern
-                Action::make('Mark Interview')
-    ->visible(fn ($record) => $record->status === 'applied')
-    ->action(fn ($record) => $record->update(['status' => 'interview']))
-    ->color('warning'),
+                ->options(Application::statuses()),
+                ])
+                    
+                ->actions([
 
-    Action::make('Select Intern')
-    ->visible(fn ($record) => $record->status === 'interview')
-    ->action(fn ($record) => $record->update(['status' => 'selected']))
-    ->color('success'),
+                    // // TO view
+                    // ViewAction::make(),
 
-// for edit 
-    Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                      // for edit 
+                    Tables\Actions\EditAction::make(),
+
+                     // for change status from intern
+                        Action::make('Schedule Interview')
+                            ->visible(fn ($record) => $record->status === 'applied')
+                            ->action(fn ($record) => $record->update(['status' => 'interviewed']))
+                            ->color('warning'),
+
+                        Action::make('Select Intern')
+                            ->visible(fn ($record) => $record->status === 'interviewed')
+                            ->action(fn ($record) => $record->update(['status' => 'selected']))
+                            ->color('success'),
+
+                ])
+                
+                ->bulkActions([
+                    Tables\Actions\BulkActionGroup::make([
+                    // to delete all records
+                      Tables\Actions\DeleteBulkAction::make(),
+
+                ])
             ]);
+
+            // for interview schedulling 
+                //       Tables\Actions\BulkAction::make('scheduleInterview')
+                //         ->label('Schedule Interview')
+                //             ->form([
+                //                     Forms\Components\Select::make('interview_batch_id')
+                //                         ->relationship('interviewBatch', 'title')
+                //                         ->required(),
+                //                 ])
+
+                //              ->action(function (Collection $records, array $data) 
+                //                     {
+                //                         foreach ($records as $application)
+                //                         {
+                //                             $application->interviewBatches()
+                //                                 ->attach($data['interview_batch_id']);
+
+                //                             $application->update([
+                //                                 'status' => 'interview_scheduled',  ]);
+                //                         }
+                //                     }
+                //                 )
+                                            
+
+
+                
+                // ]);
     }
 
     public static function getRelations(): array
@@ -161,12 +227,16 @@ class ApplicationResource extends Resource
         ];
     }
 
+       
+
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListApplications::route('/'),
             'create' => Pages\CreateApplication::route('/create'),
             'edit' => Pages\EditApplication::route('/{record}/edit'),
+            'view' => Pages\ViewApplication::route('/{record}'),
         ];
     }
 }

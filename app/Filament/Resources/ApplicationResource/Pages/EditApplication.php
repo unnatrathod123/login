@@ -16,4 +16,11 @@ class EditApplication extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    // To redirect on the page
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

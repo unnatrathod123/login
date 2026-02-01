@@ -29,12 +29,18 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandname('TechStrota')
+            ->brandLogo(asset('images/TsLogo.png'))
+            ->brandLogoHeight('10.5rem')
             ->login()
-        //     // to collapse menus
-        //     ->sidebarCollapsible()   // 👈 enables collapse
-        // ->sidebarWidth('16rem')
-        // ->collapsedSidebarWidth('4rem')
-        // ->maxContentWidth('full')
+
+         // ✅ COLLAPSIBLE SIDEBAR
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('16rem')
+            ->collapsedSidebarWidth('4.5rem')
+            
+             // ✅ FULL WIDTH CONTENT
+            ->maxContentWidth('full')
 
             ->colors([
                 'primary' => Color::Amber,
