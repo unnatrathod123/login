@@ -130,6 +130,7 @@ class ApplicationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->poll('10s') // ⬅ auto refresh
             ->defaultSort('created_at', 'desc') // 🔥 newest on top
             ->columns([
@@ -141,6 +142,13 @@ class ApplicationResource extends Resource
                 TextColumn::make('degree') ->toggleable(),
                 TextColumn::make('domain') ->toggleable(),
                 TextColumn::make('skills')  ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('resume_path')
+                    ->label('Resume')
+                    ->formatStateUsing(fn () => 'View Resume')
+                    ->url(fn ($record) => asset('storage/' . $record->resume_path))
+                    ->openUrlInNewTab()
+                    ->sortable(false),
+
                 TextColumn::make('created_at')->dateTime(),
                 
                 BadgeColumn::make('status')
@@ -236,7 +244,7 @@ class ApplicationResource extends Resource
             'index' => Pages\ListApplications::route('/'),
             'create' => Pages\CreateApplication::route('/create'),
             'edit' => Pages\EditApplication::route('/{record}/edit'),
-            'view' => Pages\ViewApplication::route('/{record}'),
+            // 'view' => Pages\ViewApplication::route('/{record}'),
         ];
     }
 }

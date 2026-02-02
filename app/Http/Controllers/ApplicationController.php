@@ -93,12 +93,12 @@ class ApplicationController extends Controller
             'degree'  => 'required|string',
             'domain'  => 'required|string',
             'skills'  => 'required|string',
-            'resume'  => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+            'resume_path'  => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
         $resumePath = null;
-        if ($request->hasFile('resume')) {
-            $resumePath = $request->file('resume')->store('resumes', 'public');
+        if ($request->hasFile('resume_path')) {
+            $resumePath = $request->file('resume_path')->store('resumes', 'public');
         }
 
         $application = Application::create([

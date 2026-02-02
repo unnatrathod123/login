@@ -17,7 +17,7 @@ class Application extends Model
         'domain',
         'skills',
         'resume_path',
-         'status',
+        'status',
         
     ];
 
