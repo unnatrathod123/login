@@ -72,23 +72,8 @@ class ApplicationResource extends Resource
                             ->required()
                             ->maxLength(100),
 
-                        // TextInput::make('domain')
-                        //     ->label('Internship Domain')
-                        //     ->required()
-                        //     ->maxLength(100),
-                        
                         Select::make('domain')
                             ->label('Internship Domain')
-                            ->options([
-                                'frontend' => 'Frontend Developer',
-                                'backend' => 'Backend Developer',
-                                'fullstack' => 'Full Stack Developer',
-                                'mobile' => 'Mobile App Developer',
-                                'uiux' => 'UI / UX Designer',
-                                'data' => 'Data Analyst',
-                                'devops' => 'DevOps Engineer',
-                                'ml' => 'Machine Learning',
-                            ])
                             ->required()
                             ->searchable()
                             ->disabled(fn ($record) => $record?->status !== 'applied'),
@@ -111,8 +96,6 @@ class ApplicationResource extends Resource
                         ->directory('resumes')
                         ->acceptedFileTypes([
                             'application/pdf',
-                            'application/msword',
-                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                         ])
                         ->downloadable()
                         ->openable()
@@ -142,12 +125,12 @@ class ApplicationResource extends Resource
                 TextColumn::make('degree') ->toggleable(),
                 TextColumn::make('domain') ->toggleable(),
                 TextColumn::make('skills')  ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('resume_path')
-                    ->label('Resume')
-                    ->formatStateUsing(fn () => 'View Resume')
-                    ->url(fn ($record) => asset('storage/' . $record->resume_path))
-                    ->openUrlInNewTab()
-                    ->sortable(false),
+                // TextColumn::make('resume_path')
+                //     ->label('Resume')
+                //     ->formatStateUsing(fn () => 'View Resume')
+                //     ->url(fn ($record) => asset('storage/' . $record->resume_path))
+                //     ->openUrlInNewTab()
+                //     ->sortable(false),
 
                 TextColumn::make('created_at')->dateTime(),
                 
@@ -175,7 +158,11 @@ class ApplicationResource extends Resource
 
                     // // TO view
                     // ViewAction::make(),
-
+                    Action::make('download')
+                        ->label('Download Resume')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->url(fn ($record) => asset('storage/' . $record->resume_path))
+                        ->openUrlInNewTab(false),
                       // for edit 
                     Tables\Actions\EditAction::make(),
 
